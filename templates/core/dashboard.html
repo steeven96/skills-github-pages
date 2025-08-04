@@ -1,0 +1,266 @@
+{% extends 'base.html' %}
+
+{% block title %}Tableau de bord - Gestion de Classe{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">
+        <i class="bi bi-speedometer2 me-3"></i>Tableau de bord
+    </h1>
+    <p class="page-subtitle">
+        Bienvenue, {{ user.get_full_name|default:user.username }} - 
+        <span class="badge bg-primary">{{ user_profile.get_user_type_display }}</span>
+    </p>
+</div>
+
+{% if user_profile.user_type == 'delegate' %}
+    <!-- Dashboard Délégué -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card stats-card">
+                <div class="card-body text-center">
+                    <i class="bi bi-people-fill text-primary mb-2" style="font-size: 2rem;"></i>
+                    <div class="stats-number">{{ students_count }}</div>
+                    <div class="text-muted">Étudiants</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stats-card">
+                <div class="card-body text-center">
+                    <i class="bi bi-book-fill text-success mb-2" style="font-size: 2rem;"></i>
+                    <div class="stats-number">{{ subjects_count }}</div>
+                    <div class="text-muted">Matières</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stats-card">
+                <div class="card-body text-center">
+                    <i class="bi bi-diagram-3-fill text-warning mb-2" style="font-size: 2rem;"></i>
+                    <div class="stats-number">{{ groups_count }}</div>
+                    <div class="text-muted">Groupes créés</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stats-card">
+                <div class="card-body text-center">
+                    <i class="bi bi-check2-square text-info mb-2" style="font-size: 2rem;"></i>
+                    <div class="stats-number">{{ recent_sessions.count }}</div>
+                    <div class="text-muted">Sessions récentes</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-lightning-charge-fill me-2"></i>Actions rapides</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'add_student' %}" class="btn btn-primary">
+                            <i class="bi bi-person-plus me-2"></i>Ajouter un étudiant
+                        </a>
+                        <a href="{% url 'import_students' %}" class="btn btn-success">
+                            <i class="bi bi-file-earmark-excel me-2"></i>Importer depuis Excel
+                        </a>
+                        <a href="{% url 'create_groups' %}" class="btn btn-warning">
+                            <i class="bi bi-diagram-3 me-2"></i>Créer des groupes
+                        </a>
+                        <a href="{% url 'create_attendance_session' %}" class="btn btn-info">
+                            <i class="bi bi-plus-square me-2"></i>Nouvelle session de présence
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-clock-history me-2"></i>Sessions récentes</h5>
+                </div>
+                <div class="card-body">
+                    {% if recent_sessions %}
+                        {% for session in recent_sessions %}
+                            <div class="d-flex justify-content-between align-items-center mb-2 p-2 bg-light rounded">
+                                <div>
+                                    <strong>{{ session.subject.name }}</strong><br>
+                                    <small class="text-muted">{{ session.date|date:"d/m/Y" }} - {{ session.start_time|time:"H:i" }}</small>
+                                </div>
+                                <a href="{% url 'generate_attendance_pdf' session.id %}" class="btn btn-sm btn-outline-primary">
+                                    <i class="bi bi-file-pdf"></i>
+                                </a>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <p class="text-muted text-center">Aucune session récente</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% elif user_profile.user_type == 'director' %}
+    <!-- Dashboard Directeur -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card stats-card">
+                <div class="card-body text-center">
+                    <i class="bi bi-clipboard-data text-primary mb-2" style="font-size: 2rem;"></i>
+                    <div class="stats-number">{{ total_sessions }}</div>
+                    <div class="text-muted">Sessions totales</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card stats-card">
+                <div class="card-body text-center">
+                    <i class="bi bi-chat-left-text text-warning mb-2" style="font-size: 2rem;"></i>
+                    <div class="stats-number">{{ pending_comments }}</div>
+                    <div class="text-muted">En attente de commentaire</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card stats-card">
+                <div class="card-body text-center">
+                    <i class="bi bi-check-circle text-success mb-2" style="font-size: 2rem;"></i>
+                    <div class="stats-number">{{ total_sessions|add:"-"|add:pending_comments }}</div>
+                    <div class="text-muted">Sessions traitées</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-lightning-charge-fill me-2"></i>Actions rapides</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'director_attendance_list' %}" class="btn btn-primary">
+                            <i class="bi bi-clipboard-data me-2"></i>Consulter les présences
+                        </a>
+                        <a href="{% url 'director_attendance_list' %}?pending=true" class="btn btn-warning">
+                            <i class="bi bi-chat-left-text me-2"></i>Sessions sans commentaire
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-clock-history me-2"></i>Sessions récentes</h5>
+                </div>
+                <div class="card-body">
+                    {% if recent_sessions %}
+                        {% for session in recent_sessions %}
+                            <div class="d-flex justify-content-between align-items-center mb-2 p-2 bg-light rounded">
+                                <div>
+                                    <strong>{{ session.subject.name }}</strong><br>
+                                    <small class="text-muted">{{ session.date|date:"d/m/Y" }} par {{ session.created_by.get_full_name }}</small>
+                                </div>
+                                <div>
+                                    <a href="{% url 'generate_attendance_pdf' session.id %}" class="btn btn-sm btn-outline-primary me-1">
+                                        <i class="bi bi-file-pdf"></i>
+                                    </a>
+                                    <a href="{% url 'director_add_comment' session.id %}" class="btn btn-sm btn-outline-success">
+                                        <i class="bi bi-chat-left-text"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <p class="text-muted text-center">Aucune session récente</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% elif user_profile.user_type == 'student' %}
+    <!-- Dashboard Étudiant -->
+    {% if student %}
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <div class="card stats-card">
+                    <div class="card-body text-center">
+                        <i class="bi bi-diagram-3 text-primary mb-2" style="font-size: 2rem;"></i>
+                        <div class="stats-number">{{ my_groups.count }}</div>
+                        <div class="text-muted">Mes groupes</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card stats-card">
+                    <div class="card-body text-center">
+                        <i class="bi bi-folder text-success mb-2" style="font-size: 2rem;"></i>
+                        <div class="stats-number">{{ my_projects.count }}</div>
+                        <div class="text-muted">Projets disponibles</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card stats-card">
+                    <div class="card-body text-center">
+                        <i class="bi bi-mortarboard text-info mb-2" style="font-size: 2rem;"></i>
+                        <div class="text-muted">Filière</div>
+                        <div class="h5 text-primary">{{ student.get_filiere_display }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="bi bi-lightning-charge-fill me-2"></i>Actions rapides</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-grid gap-2">
+                            <a href="{% url 'student_groups' %}" class="btn btn-primary">
+                                <i class="bi bi-diagram-3 me-2"></i>Voir mes groupes
+                            </a>
+                            <a href="{% url 'student_projects' %}" class="btn btn-success">
+                                <i class="bi bi-folder me-2"></i>Mes projets
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="bi bi-person-badge me-2"></i>Mon profil</h5>
+                    </div>
+                    <div class="card-body">
+                        <p><strong>Nom :</strong> {{ student.last_name }}</p>
+                        <p><strong>Prénom :</strong> {{ student.first_name }}</p>
+                        <p><strong>Numéro étudiant :</strong> {{ student.student_id }}</p>
+                        <p><strong>Filière :</strong> {{ student.get_filiere_display }}</p>
+                        {% if student.email %}
+                            <p><strong>Email :</strong> {{ student.email }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% else %}
+        <div class="alert alert-warning">
+            <i class="bi bi-exclamation-triangle me-2"></i>
+            Votre profil étudiant n'est pas encore configuré. Contactez le délégué de classe.
+        </div>
+    {% endif %}
+{% endif %}
+{% endblock %}

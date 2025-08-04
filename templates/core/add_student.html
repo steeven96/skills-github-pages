@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Ajouter un étudiant - Gestion de Classe{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">
+        <i class="bi bi-person-plus me-3"></i>Ajouter un étudiant
+    </h1>
+    <p class="page-subtitle">Saisie manuelle des informations d'un nouvel étudiant</p>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-form me-2"></i>Informations de l'étudiant</h5>
+            </div>
+            <div class="card-body">
+                {% crispy form %}
+            </div>
+        </div>
+
+        <!-- Aide -->
+        <div class="card mt-4">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="bi bi-info-circle me-2"></i>Aide</h6>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Filières disponibles :</h6>
+                        <ul class="list-unstyled">
+                            <li><i class="bi bi-check text-success me-2"></i>Informatique</li>
+                            <li><i class="bi bi-check text-success me-2"></i>Mathématiques</li>
+                            <li><i class="bi bi-check text-success me-2"></i>Physique</li>
+                            <li><i class="bi bi-check text-success me-2"></i>Chimie</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Format du numéro étudiant :</h6>
+                        <p class="text-muted">
+                            Le numéro étudiant doit être unique pour chaque étudiant. 
+                            Exemple : <code>2024001</code>, <code>INF2024001</code>
+                        </p>
+                        
+                        <h6>Email (optionnel) :</h6>
+                        <p class="text-muted">
+                            L'email permettra d'envoyer des notifications à l'étudiant.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

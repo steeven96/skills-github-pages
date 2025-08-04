@@ -1,0 +1,151 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Importer des étudiants - Gestion de Classe{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">
+        <i class="bi bi-file-earmark-excel me-3"></i>Importer des étudiants
+    </h1>
+    <p class="page-subtitle">Importation en masse depuis un fichier Excel</p>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-upload me-2"></i>Télécharger le fichier Excel</h5>
+            </div>
+            <div class="card-body">
+                {% crispy form %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="bi bi-info-circle me-2"></i>Format attendu</h6>
+            </div>
+            <div class="card-body">
+                <p class="small">Le fichier Excel doit contenir les colonnes suivantes dans cet ordre :</p>
+                <ol class="small">
+                    <li><strong>Nom(s)</strong> - Obligatoire</li>
+                    <li><strong>Prénom(s)</strong> - Obligatoire</li>
+                    <li><strong>Filière</strong> - Obligatoire</li>
+                    <li><strong>Numéro étudiant</strong> - Obligatoire</li>
+                    <li><strong>Email</strong> - Optionnel</li>
+                </ol>
+                
+                <div class="alert alert-warning small">
+                    <i class="bi bi-exclamation-triangle me-2"></i>
+                    La première ligne (en-têtes) sera ignorée lors de l'importation.
+                </div>
+            </div>
+        </div>
+
+        <div class="card mt-3">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="bi bi-download me-2"></i>Modèle Excel</h6>
+            </div>
+            <div class="card-body text-center">
+                <p class="small text-muted">Téléchargez un modèle Excel pré-formaté</p>
+                <button class="btn btn-outline-primary btn-sm" onclick="downloadTemplate()">
+                    <i class="bi bi-file-earmark-excel me-2"></i>Télécharger le modèle
+                </button>
+            </div>
+        </div>
+
+        <div class="card mt-3">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="bi bi-list-check me-2"></i>Filières acceptées</h6>
+            </div>
+            <div class="card-body">
+                <ul class="list-unstyled small">
+                    <li><i class="bi bi-check text-success me-2"></i>Informatique</li>
+                    <li><i class="bi bi-check text-success me-2"></i>Mathématiques</li>
+                    <li><i class="bi bi-check text-success me-2"></i>Physique</li>
+                    <li><i class="bi bi-check text-success me-2"></i>Chimie</li>
+                    <li><i class="bi bi-check text-success me-2"></i>Biologie</li>
+                    <li><i class="bi bi-check text-success me-2"></i>Économie</li>
+                    <li><i class="bi bi-check text-success me-2"></i>Gestion</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Exemple de données -->
+<div class="card mt-4">
+    <div class="card-header">
+        <h6 class="mb-0"><i class="bi bi-table me-2"></i>Exemple de données</h6>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-sm table-bordered">
+                <thead class="table-light">
+                    <tr>
+                        <th>Nom(s)</th>
+                        <th>Prénom(s)</th>
+                        <th>Filière</th>
+                        <th>Numéro étudiant</th>
+                        <th>Email</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Dupont</td>
+                        <td>Jean Pierre</td>
+                        <td>Informatique</td>
+                        <td>2024001</td>
+                        <td>jean.dupont@email.com</td>
+                    </tr>
+                    <tr>
+                        <td>Martin</td>
+                        <td>Marie</td>
+                        <td>Mathématiques</td>
+                        <td>2024002</td>
+                        <td>marie.martin@email.com</td>
+                    </tr>
+                    <tr>
+                        <td>Bernard</td>
+                        <td>Paul</td>
+                        <td>Physique</td>
+                        <td>2024003</td>
+                        <td></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function downloadTemplate() {
+    // Créer un fichier Excel simple avec les en-têtes
+    const data = [
+        ['Nom(s)', 'Prénom(s)', 'Filière', 'Numéro étudiant', 'Email'],
+        ['Dupont', 'Jean Pierre', 'Informatique', '2024001', 'jean.dupont@email.com'],
+        ['Martin', 'Marie', 'Mathématiques', '2024002', 'marie.martin@email.com'],
+        ['Bernard', 'Paul', 'Physique', '2024003', '']
+    ];
+    
+    let csvContent = "data:text/csv;charset=utf-8,";
+    data.forEach(function(rowArray) {
+        let row = rowArray.join(",");
+        csvContent += row + "\r\n";
+    });
+    
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", "modele_etudiants.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+</script>
+{% endblock %}
